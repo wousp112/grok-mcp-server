@@ -1,7 +1,7 @@
 {
   "name": "grok-mcp-server",
   "version": "1.2.0",
-  "description": "MCP server for real-time web search via Grok API — structured results with sources, confidence scores, and multi-language support",
+  "description": "Grok to API MCP server for real-time web search — structured results with sources, confidence scores, and multi-language support",
   "main": "index.js",
   "type": "module",
   "bin": {
