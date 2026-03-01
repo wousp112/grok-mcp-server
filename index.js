@@ -22,11 +22,10 @@ const API_KEY = process.env.GROK_API_KEY || '';
 const GROK_MODEL = process.env.GROK_MODEL || 'grok-3';
 
 // ── Optional tuning ─────────────────────────────────────────────────
-const REQUEST_TIMEOUT_MS = Number(process.env.GROK_REQUEST_TIMEOUT_MS || 60000);
-const MAX_RETRIES = Number(process.env.GROK_MAX_RETRIES || 2);
-const BACKOFF_BASE_MS = Number(process.env.GROK_BACKOFF_BASE_MS || 800);
-const CONNECT_TIMEOUT_MS = Number(process.env.GROK_CONNECT_TIMEOUT_MS || 10000);
-const READ_TIMEOUT_MS = Number(process.env.GROK_READ_TIMEOUT_MS || REQUEST_TIMEOUT_MS);
+const REQUEST_TIMEOUT_MS = readIntEnv('GROK_REQUEST_TIMEOUT_MS', 60000, 1000, 300000);
+const MAX_RETRIES = readIntEnv('GROK_MAX_RETRIES', 2, 0, 8);
+const BACKOFF_BASE_MS = readIntEnv('GROK_BACKOFF_BASE_MS', 800, 100, 30000);
+const READ_TIMEOUT_MS = readIntEnv('GROK_READ_TIMEOUT_MS', REQUEST_TIMEOUT_MS, 1000, 300000);
 
 // ── Runtime metrics ─────────────────────────────────────────────────
 const runtimeStats = {
@@ -54,6 +53,17 @@ function nowIso() {
     return new Date().toISOString();
 }
 
+function readIntEnv(name, defaultValue, min, max) {
+    const raw = process.env[name];
+    if (raw === undefined || raw === '') return defaultValue;
+    const value = Number.parseInt(raw, 10);
+    if (!Number.isFinite(value) || value < min || value > max) {
+        console.error(`[${SERVER_NAME}] Invalid ${name}=${raw}. Using default ${defaultValue}.`);
+        return defaultValue;
+    }
+    return value;
+}
+
 function classifyAxiosError(error) {
     if (!axios.isAxiosError(error)) {
         return { code: 'UNKNOWN_ERROR', message: String(error), retryable: false, status: undefined };
@@ -73,10 +83,10 @@ function classifyAxiosError(error) {
     if (status && status >= 500) {
         return { code: 'UPSTREAM_5XX', message: upstreamMessage, retryable: true, status };
     }
-    if (error.code === 'ECONNABORTED') {
+    if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT' || error.code === 'ESOCKETTIMEDOUT') {
         return { code: 'UPSTREAM_TIMEOUT', message: upstreamMessage, retryable: true, status };
     }
-    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED' || error.code === 'ECONNRESET') {
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED' || error.code === 'ECONNRESET' || error.code === 'EAI_AGAIN') {
         return { code: 'NETWORK_ERROR', message: upstreamMessage, retryable: true, status };
     }
     return { code: 'UPSTREAM_4XX', message: upstreamMessage, retryable: false, status };
@@ -319,7 +329,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === 'grok_web_search') {
         runtimeStats.tool_calls_total += 1;
-        callSeq += 1;
+        const thisCallSeq = ++callSeq;
 
         if (!API_BASE_URL) {
             runtimeStats.tool_calls_error += 1;
@@ -349,7 +359,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const options = normalizeOptions(args);
         const startedAt = Date.now();
         console.error(
-            `[${SERVER_NAME}] request_id=${requestId} call_seq=${callSeq} event=tool_start tool=${name} query_len=${query.length} output_mode=${options.outputMode} freshness_days=${options.freshnessDays ?? 'n/a'} max_sources=${options.maxSources} domains=${options.domains.length}`
+            `[${SERVER_NAME}] request_id=${requestId} call_seq=${thisCallSeq} event=tool_start tool=${name} query_len=${query.length} output_mode=${options.outputMode} freshness_days=${options.freshnessDays ?? 'n/a'} max_sources=${options.maxSources} domains=${options.domains.length}`
         );
 
         try {
@@ -375,7 +385,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             const endToEndMs = Date.now() - startedAt;
             runtimeStats.tool_calls_success += 1;
             console.error(
-                `[${SERVER_NAME}] request_id=${requestId} call_seq=${callSeq} event=tool_ok attempts=${attempts} end_to_end_ms=${endToEndMs} upstream_total_ms=${totalLatencyMs} source_count=${sourceCount}`
+                `[${SERVER_NAME}] request_id=${requestId} call_seq=${thisCallSeq} event=tool_ok attempts=${attempts} end_to_end_ms=${endToEndMs} upstream_total_ms=${totalLatencyMs} source_count=${sourceCount}`
             );
 
             return {
@@ -398,9 +408,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                         domains_allowlist: options.domains,
                     },
                     metrics: {
-                        call_seq: callSeq,
+                        call_seq: thisCallSeq,
                         end_to_end_ms: endToEndMs,
-                        connect_timeout_ms: CONNECT_TIMEOUT_MS,
                         read_timeout_ms: READ_TIMEOUT_MS,
                         attempts,
                         runtime_counters: {
@@ -422,7 +431,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             runtimeStats.errors_by_code[code] = (runtimeStats.errors_by_code[code] || 0) + 1;
             const errorMsg = `Failed to execute grok_web_search [${code}]${status ? ` status=${status}` : ''}: ${error?.message || String(error)}`;
             console.error(
-                `[${SERVER_NAME}] request_id=${requestId} call_seq=${callSeq} event=tool_err code=${code} status=${status ?? 'n/a'} attempts=${attempts} total_ms=${totalLatencyMs}`
+                `[${SERVER_NAME}] request_id=${requestId} call_seq=${thisCallSeq} event=tool_err code=${code} status=${status ?? 'n/a'} attempts=${attempts} total_ms=${totalLatencyMs}`
             );
             return {
                 content: [{ type: 'text', text: `Error: ${errorMsg}` }],
@@ -430,7 +439,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                     request_id: requestId,
                     error: { code, status, message: error?.message || String(error) },
                     metrics: {
-                        call_seq: callSeq,
+                        call_seq: thisCallSeq,
                         attempts,
                         total_latency_ms: totalLatencyMs,
                         runtime_counters: {

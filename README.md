@@ -24,7 +24,7 @@ This server bridges MCP clients to a [grok2api](https://github.com/chenyme/grok2
 - **Multi-language support** — respond in any language
 - **Time range filtering** — `24h`, `7d`, `30d`, `all`
 - **Source freshness control** — prefer recent sources
-- **Domain allowlisting** — restrict to trusted domains
+- **Domain allowlist preference** — prioritize trusted domains (best-effort)
 - **Automatic retries** with exponential backoff
 - **Runtime metrics** via `grok_stats` tool
 
@@ -67,8 +67,7 @@ Copy `.env.example` to `.env` and fill in your values:
 | `GROK_REQUEST_TIMEOUT_MS` | No | `60000` | Request timeout (ms) |
 | `GROK_MAX_RETRIES` | No | `2` | Max retry attempts |
 | `GROK_BACKOFF_BASE_MS` | No | `800` | Base backoff delay for retries (ms) |
-| `GROK_CONNECT_TIMEOUT_MS` | No | `10000` | Connection timeout (ms) |
-| `GROK_READ_TIMEOUT_MS` | No | Same as request timeout | Read timeout (ms) |
+| `GROK_READ_TIMEOUT_MS` | No | Same as request timeout | Axios timeout (ms) |
 
 ## MCP Client Configuration
 
@@ -140,7 +139,7 @@ Search the web or Twitter/X via Grok with structured output.
 | `time_range` | `24h`\|`7d`\|`30d`\|`all` | No | `all` | Search lookback window |
 | `freshness_days` | integer | No | — | Prefer sources within N days |
 | `max_sources` | integer | No | `8` | Max sources in output (1–20) |
-| `domains_allowlist` | string[] | No | — | Preferred source domains (max 30) |
+| `domains_allowlist` | string[] | No | — | Preferred source domains, best-effort (max 30) |
 
 **Response structure:**
 

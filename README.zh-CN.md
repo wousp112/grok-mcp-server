@@ -24,7 +24,7 @@ Claude / Cursor 等  ──MCP──>  grok-mcp-server  ──HTTP──>  grok2
 - **多语言支持** — 可用任意语言响应
 - **时间范围过滤** — `24h`、`7d`、`30d`、`all`
 - **来源新鲜度控制** — 优先显示近期内容
-- **域名白名单** — 限定可信来源域名
+- **域名白名单偏好** — 优先可信来源（best-effort）
 - **自动重试** — 指数退避策略
 - **运行时指标** — 通过 `grok_stats` 工具查看
 
@@ -67,8 +67,7 @@ npm install
 | `GROK_REQUEST_TIMEOUT_MS` | 否 | `60000` | 请求超时时间（毫秒） |
 | `GROK_MAX_RETRIES` | 否 | `2` | 最大重试次数 |
 | `GROK_BACKOFF_BASE_MS` | 否 | `800` | 重试基础退避时间（毫秒） |
-| `GROK_CONNECT_TIMEOUT_MS` | 否 | `10000` | 连接超时时间（毫秒） |
-| `GROK_READ_TIMEOUT_MS` | 否 | 同请求超时 | 读取超时时间（毫秒） |
+| `GROK_READ_TIMEOUT_MS` | 否 | 同请求超时 | Axios 超时时间（毫秒） |
 
 ## MCP 客户端配置
 
@@ -140,7 +139,7 @@ npm install
 | `time_range` | `24h`\|`7d`\|`30d`\|`all` | 否 | `all` | 搜索时间范围 |
 | `freshness_days` | integer | 否 | — | 优先显示 N 天内的来源 |
 | `max_sources` | integer | 否 | `8` | 最多返回来源数量（1–20） |
-| `domains_allowlist` | string[] | 否 | — | 白名单域名列表（最多 30 个） |
+| `domains_allowlist` | string[] | 否 | — | 偏好域名列表（best-effort，最多 30 个） |
 
 **响应结构：**
 
