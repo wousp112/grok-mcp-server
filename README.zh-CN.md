@@ -1,6 +1,6 @@
 <div align="center">
 
-# Grok to API MCP Server
+# Grok2API MCP Server
 
 [English](./README.md) · **中文**
 
