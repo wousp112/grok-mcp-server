@@ -38,7 +38,12 @@ You need a running [grok2api](https://github.com/chenyme/grok2api) instance (or 
 
 ### 1. Deploy grok2api
 
-The quickest way is Docker Compose:
+Choose the method that fits your environment:
+
+<details>
+<summary><b>VPS / Server (Docker Compose — recommended)</b></summary>
+
+Requires [Docker](https://docs.docker.com/get-docker/) and Docker Compose installed on your server.
 
 ```bash
 git clone https://github.com/chenyme/grok2api
@@ -46,9 +51,71 @@ cd grok2api
 docker compose up -d
 ```
 
-The admin panel will be available at `http://your-server:8000/admin` (default password: `grok2api`).
+The admin panel will be available at `http://your-server-ip:8000/admin` (default password: `grok2api`).
 
-For other deployment methods (local, Vercel, Render), see the [grok2api README](https://github.com/chenyme/grok2api).
+</details>
+
+<details>
+<summary><b>macOS (local)</b></summary>
+
+Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
+
+```bash
+# Install uv if you don't have it
+brew install uv
+
+# Clone and run
+git clone https://github.com/chenyme/grok2api
+cd grok2api
+uv sync
+uv run main.py
+```
+
+The admin panel will be at `http://localhost:8000/admin` (default password: `grok2api`).
+
+</details>
+
+<details>
+<summary><b>Windows (local)</b></summary>
+
+Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
+
+```powershell
+# Install uv (PowerShell)
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Clone and run
+git clone https://github.com/chenyme/grok2api
+cd grok2api
+uv sync
+uv run main.py
+```
+
+The admin panel will be at `http://localhost:8000/admin` (default password: `grok2api`).
+
+</details>
+
+<details>
+<summary><b>Linux (local, without Docker)</b></summary>
+
+Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
+
+```bash
+# Install uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone and run
+git clone https://github.com/chenyme/grok2api
+cd grok2api
+uv sync
+uv run main.py
+```
+
+The admin panel will be at `http://localhost:8000/admin` (default password: `grok2api`).
+
+</details>
+
+For cloud deployments (Vercel, Render), see the [grok2api README](https://github.com/chenyme/grok2api).
 
 ### 2. Get Your Grok Cookie
 

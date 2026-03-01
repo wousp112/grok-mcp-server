@@ -38,7 +38,12 @@ Claude / Cursor 等  ──MCP──>  grok-mcp-server  ──HTTP──>  grok2
 
 ### 1. 部署 grok2api
 
-最简单的方式是 Docker Compose：
+根据你的环境选择合适的部署方式：
+
+<details>
+<summary><b>VPS / 服务器（Docker Compose — 推荐）</b></summary>
+
+需要在服务器上安装 [Docker](https://docs.docker.com/get-docker/) 和 Docker Compose。
 
 ```bash
 git clone https://github.com/chenyme/grok2api
@@ -46,9 +51,71 @@ cd grok2api
 docker compose up -d
 ```
 
-管理面板地址：`http://your-server:8000/admin`（默认密码：`grok2api`）。
+管理面板地址：`http://你的服务器IP:8000/admin`（默认密码：`grok2api`）。
 
-其他部署方式（本地运行、Vercel、Render）请参考 [grok2api README](https://github.com/chenyme/grok2api)。
+</details>
+
+<details>
+<summary><b>macOS（本地运行）</b></summary>
+
+需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。
+
+```bash
+# 安装 uv（如果还没装）
+brew install uv
+
+# 克隆并运行
+git clone https://github.com/chenyme/grok2api
+cd grok2api
+uv sync
+uv run main.py
+```
+
+管理面板地址：`http://localhost:8000/admin`（默认密码：`grok2api`）。
+
+</details>
+
+<details>
+<summary><b>Windows（本地运行）</b></summary>
+
+需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。
+
+```powershell
+# 安装 uv（PowerShell）
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# 克隆并运行
+git clone https://github.com/chenyme/grok2api
+cd grok2api
+uv sync
+uv run main.py
+```
+
+管理面板地址：`http://localhost:8000/admin`（默认密码：`grok2api`）。
+
+</details>
+
+<details>
+<summary><b>Linux（本地运行，不用 Docker）</b></summary>
+
+需要 Python 3.11+ 和 [uv](https://docs.astral.sh/uv/)。
+
+```bash
+# 安装 uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 克隆并运行
+git clone https://github.com/chenyme/grok2api
+cd grok2api
+uv sync
+uv run main.py
+```
+
+管理面板地址：`http://localhost:8000/admin`（默认密码：`grok2api`）。
+
+</details>
+
+云部署方式（Vercel、Render）请参考 [grok2api README](https://github.com/chenyme/grok2api)。
 
 ### 2. 获取 Grok Cookie
 
