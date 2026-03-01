@@ -32,6 +32,44 @@ Claude / Cursor 等  ──MCP──>  grok-mcp-server  ──HTTP──>  grok2
 
 需要一个运行中的 [grok2api](https://github.com/chenyme/grok2api) 实例（或任何支持 Grok 网络搜索的 OpenAI 兼容 API 端点）。
 
+## 配置 grok2api 后端
+
+> **强烈建议使用小号操作，不要使用主账号。**
+
+### 1. 部署 grok2api
+
+最简单的方式是 Docker Compose：
+
+```bash
+git clone https://github.com/chenyme/grok2api
+cd grok2api
+docker compose up -d
+```
+
+管理面板地址：`http://your-server:8000/admin`（默认密码：`grok2api`）。
+
+其他部署方式（本地运行、Vercel、Render）请参考 [grok2api README](https://github.com/chenyme/grok2api)。
+
+### 2. 获取 Grok Cookie
+
+1. 用你的 Grok 账号登录 [grok.com](https://grok.com)
+2. 打开浏览器开发者工具（`F12` 或 `Cmd+Opt+I`）
+3. 切换到 **Application** 选项卡
+4. 在左侧栏展开 **Storage → Cookies**
+5. 找到名为 `sso` 或 `sso-rw` 的 Cookie
+6. 复制其值
+
+### 3. 在 grok2api 中添加 Token
+
+1. 打开 grok2api 管理面板（`http://your-server:8000/admin`）
+2. 点击 **添加** 按钮
+3. 粘贴刚才复制的 Cookie 值
+4. 根据你的 Grok 订阅类型选择账户类型：
+   - **Basic** — 每 20 小时 80 次请求
+   - **Super** — 每 2 小时 140 次请求
+
+`.env` 中的 `GROK_API_KEY` 是 grok2api 的管理密钥（即 `app.app_key` 的值，默认为 `grok2api`）。
+
 ## 安装
 
 **方案 A：全局安装（推荐）**

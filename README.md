@@ -32,6 +32,44 @@ This server bridges MCP clients to a [grok2api](https://github.com/chenyme/grok2
 
 You need a running [grok2api](https://github.com/chenyme/grok2api) instance (or any OpenAI-compatible API endpoint backed by a Grok model with web search).
 
+## Setting Up the grok2api Backend
+
+> **It is strongly recommended to use a secondary/alt Grok account for this, not your primary account.**
+
+### 1. Deploy grok2api
+
+The quickest way is Docker Compose:
+
+```bash
+git clone https://github.com/chenyme/grok2api
+cd grok2api
+docker compose up -d
+```
+
+The admin panel will be available at `http://your-server:8000/admin` (default password: `grok2api`).
+
+For other deployment methods (local, Vercel, Render), see the [grok2api README](https://github.com/chenyme/grok2api).
+
+### 2. Get Your Grok Cookie
+
+1. Log into [grok.com](https://grok.com) with your Grok account
+2. Open browser DevTools (`F12` or `Cmd+Opt+I`)
+3. Go to the **Application** tab
+4. In the left sidebar, expand **Storage → Cookies**
+5. Find the cookie named `sso` or `sso-rw`
+6. Copy its value
+
+### 3. Add Token to grok2api
+
+1. Open the grok2api admin panel (`http://your-server:8000/admin`)
+2. Click **Add** to add a new token
+3. Paste the cookie value you just copied
+4. Select your account type based on your Grok subscription:
+   - **Basic** — 80 requests per 20 hours
+   - **Super** — 140 requests per 2 hours
+
+The `GROK_API_KEY` in your `.env` is the admin key configured in grok2api (the `app.app_key` value, default: `grok2api`).
+
 ## Installation
 
 **Option A: Global install (recommended)**
