@@ -7,6 +7,7 @@ import axios from 'axios';
 import * as dotenv from 'dotenv';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { extractAssistantTextFromUpstreamData } from './lib/upstream-response.js';
 
 // Always load .env from this script's directory, regardless of process cwd.
 const __filename = fileURLToPath(import.meta.url);
@@ -378,7 +379,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             };
             const { response, attempts, totalLatencyMs } = await postWithRetry({ requestId, body, headers });
 
-            const reply = response.data?.choices?.[0]?.message?.content || 'No response generated.';
+            const reply = extractAssistantTextFromUpstreamData(response.data) || 'No response generated.';
             const parsed = extractJsonObject(reply);
             const structured = sanitizeStructuredResult(parsed, reply);
             const sourceCount = structured.sources.length;

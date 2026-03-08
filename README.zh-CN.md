@@ -26,6 +26,7 @@ Claude / Cursor 等  ──MCP──>  grok-mcp-server  ──HTTP──>  grok2
 - **来源新鲜度控制** — 优先显示近期内容
 - **域名白名单偏好** — 优先可信来源（best-effort）
 - **自动重试** — 指数退避策略
+- **兼容 SSE 响应解析** — 即使上游在 `stream: false` 时返回 `text/event-stream`，也能正确提取结果
 - **运行时指标** — 通过 `grok_stats` 工具查看
 
 ## 前置条件
@@ -235,6 +236,8 @@ npm install
 ### `grok_web_search`
 
 通过 Grok 搜索网络或 Twitter/X，返回结构化结果。
+
+服务器同时兼容标准 OpenAI 风格 JSON completion 和 Grok 代理常见的 SSE 文本流响应；如果上游在非流式请求下仍返回 `text/event-stream`，工具也会尝试正确还原最终内容。
 
 | 参数 | 类型 | 必填 | 默认值 | 说明 |
 |------|------|------|--------|------|

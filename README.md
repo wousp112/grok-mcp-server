@@ -26,6 +26,7 @@ This server bridges MCP clients to a [grok2api](https://github.com/chenyme/grok2
 - **Source freshness control** — prefer recent sources
 - **Domain allowlist preference** — prioritize trusted domains (best-effort)
 - **Automatic retries** with exponential backoff
+- **SSE-compatible response parsing** — handles backends that return `text/event-stream` payloads even when `stream: false`
 - **Runtime metrics** via `grok_stats` tool
 
 ## Prerequisites
@@ -235,6 +236,8 @@ Add to `.cursor/mcp.json`:
 ### `grok_web_search`
 
 Search the web or Twitter/X via Grok with structured output.
+
+The server accepts both standard OpenAI-style JSON completions and Grok-compatible SSE payloads from upstream backends. This helps when a proxy returns `text/event-stream` data despite a non-streaming request.
 
 | Parameter | Type | Required | Default | Description |
 |-----------|------|----------|---------|-------------|
